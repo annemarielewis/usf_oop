@@ -1,0 +1,9 @@
+//Your name: Annemarie Lewis
+//o Your USF email address: alewis16@dons.usfca.edu
+//o Your GitHub ID name: 140355575
+//o Enter the data that you read in “answer.txt”: 42
+//o Then, enter some interesting but not overly personal information about yourself, to help
+//the TA and instructor learn all your names more quickly.: I directed a feature film before transitioning to persuing a coding carreer
+//Do you have any special skills? : Filmaking
+//Can you ride a unicycle?: Sadly no. | How many languages can you speak?: 1.5--> (.5 because my spanish is shaky atm). |
+//Do you have any pets?: Yes! The goodest boy in the world, a 4.5-year-old border collie named Mesa.
