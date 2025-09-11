@@ -5,7 +5,7 @@
  * FallingPenny.java
  */
 
-import java.math.*;
+import java.math.*; //I don't think I used this?
 import java.lang.Math;
 import java.util.Scanner;
 
@@ -24,7 +24,10 @@ public class FallingPenny {
     // METHOD______________________________________________
     public static void main(String[] args) { // main method!!! Calculating using height of 381 ft skyscraper!!!
 
-        double ESBheight = 381 * 0.3048; // meters->converted 381 feet to meters, cause gets wrong answer without
+        // MISTAKE: double ESBheight = 381 * 0.3048; // meters->converted 381 feet to
+        // meters, cause gets wrong answer without-->MISTAKE form submission 1: it is
+        // 381 meters (not feet)
+        int ESBheight = 381;
         double fallingTime = Math.sqrt(2 * ESBheight / acceleration);
         System.out.println("It takes " + fallingTime + " seconds to reach the ground.");
         // It takes 4.868239425299542 seconds to reach the ground.
@@ -144,6 +147,12 @@ public class FallingPenny {
 
     public static double spaceFallingTime(double distance, String planet) {
         double acceleration = getAcceleration(planet); // using the helper function/method below
+
+        if (acceleration <= 0) {
+            System.out.println("Invalid planet or non-positive acceleration.");
+            return -1; // Or throw an exception
+        }
+
         double terminalVelocity = 18.0; // m/s //assuming it's the same-->though it's probably not
         double timeToTerminalVelocity = terminalVelocity / acceleration;
         double accelDistance = 0.5 * acceleration * timeToTerminalVelocity * timeToTerminalVelocity;
@@ -159,7 +168,6 @@ public class FallingPenny {
 
     // __________________________helper function/method for spaceFallingTime method,
     // above ^___________
-
     public static double getAcceleration(String planet) {
         switch (planet.toLowerCase()) {
             case "earth":
