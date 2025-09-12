@@ -1,7 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet; //implemented hash functionality in removeRepeatedLetters without
+import java.util.HashSet; //implemented same functionality in removeRepeatedLetters without using hash
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;

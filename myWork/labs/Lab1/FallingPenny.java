@@ -24,9 +24,6 @@ public class FallingPenny {
     // METHOD______________________________________________
     public static void main(String[] args) { // main method!!! Calculating using height of 381 ft skyscraper!!!
 
-        // MISTAKE: double ESBheight = 381 * 0.3048; // meters->converted 381 feet to
-        // meters, cause gets wrong answer without-->MISTAKE form submission 1: it is
-        // 381 meters (not feet)
         int ESBheight = 381;
         double fallingTime = Math.sqrt(2 * ESBheight / acceleration);
         System.out.println("It takes " + fallingTime + " seconds to reach the ground.");
