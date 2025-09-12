@@ -148,22 +148,10 @@ public class FallingPenny {
     public static double spaceFallingTime(double distance, String planet) {
         double acceleration = getAcceleration(planet); // using the helper function/method below
 
-        if (acceleration <= 0) {
-            System.out.println("Invalid planet or non-positive acceleration.");
-            return -1; // Or throw an exception
-        }
-
-        double terminalVelocity = 18.0; // m/s //assuming it's the same-->though it's probably not
-        double timeToTerminalVelocity = terminalVelocity / acceleration;
-        double accelDistance = 0.5 * acceleration * timeToTerminalVelocity * timeToTerminalVelocity;
-
-        if (distance <= accelDistance) {
+        if (acceleration >= 0) {
             return Math.sqrt((2 * distance) / acceleration);
-        } else {
-            double remainingDistance = distance - accelDistance;
-            double timeAtTerminalVelocity = remainingDistance / terminalVelocity;
-            return timeToTerminalVelocity + timeAtTerminalVelocity;
         }
+        return 0;
     }
 
     // __________________________helper function/method for spaceFallingTime method,
