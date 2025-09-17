@@ -42,7 +42,7 @@ public class Cat {
         if (height > 0) {
             this.height = height;
         } else {
-            System.out.println("Invalid height. Height must be greater than 0.");
+            System.out.println("Invalid height. Height must be greater than 0 llwefhoergfkuergfiugtiugdhsvejhfgduyfejfhv.");
         }
     }
 
