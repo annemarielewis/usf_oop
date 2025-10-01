@@ -1,13 +1,8 @@
 // AnnemarieLewis_hw2
-//note: Doing it a bit different made more sense to me organizationally
-// Wrote my approach in ReviewManager2 --> then copied over here, deleting prior code that was here
-//I hope that's okay!
-
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class ReviewManager {
+public class ReviewManager2 {
     public static void main(String[] args) throws IOException {
 
         // create object with pos and neg words passed into sentiment analyzer

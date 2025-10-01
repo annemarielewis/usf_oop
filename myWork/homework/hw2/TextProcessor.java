@@ -1,31 +1,37 @@
+// AnnemarieLewis_hw2
 // TextProcessor.java
 import java.io.*;
 import java.util.*;
 
 
 public class TextProcessor {
-    // stop words to remove for review processing
-    private static final ArrayList<String> STOP_WORDS = new ArrayList<>(
-            Arrays.asList(
-                    "a", "an", "the", "and", "or", "but", "of", "to", "in", "on", "about", "above", "after", "again",
-                    "against", "all", "am", "any", "are", "aren't", "as", "at", "be", "because", "been", "before",
-                    "being", "below", "between", "both", "by", "can't", "cannot", "could", "couldn't", "did", "didn't",
-                    "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from", "further",
-                    "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll", "he's", "her",
-                    "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll",
-                    "i'm", "i've", "if", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more",
-                    "most", "mustn't", "my", "myself", "no", "nor", "not", "off", "once", "only", "other", "ought",
-                    "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll",
-                    "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "their", "theirs",
-                    "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're",
-                    "they've", "this", "those", "through", "too", "under", "until", "up", "very", "was", "wasn't", "we",
-                    "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where",
-                    "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would",
-                    "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
-            )
-    );
 
-    // Reading the File to Parse, implementing below helper functions stripPunctuation & isStopWord:
+    //functionality for accessing stop words:
+    private static ArrayList<String> STOP_WORDS;
+        static {
+            try {
+                STOP_WORDS = loadStopWords("stopwords.txt");
+            } catch (IOException e) {
+                System.err.println("Error loading stop words: " + e.getMessage());
+                STOP_WORDS = new ArrayList<>();
+            }
+        }
+//helper function for the above function accessing the stop words
+        private static ArrayList<String> loadStopWords(String filePath) throws IOException {
+            ArrayList<String> stopWords = new ArrayList<>();
+            File file = new File(filePath);
+            try (Scanner scanner = new Scanner(file)) {
+                while (scanner.hasNextLine()) {
+                    String word = scanner.nextLine().trim().toLowerCase();
+                    if (!word.isEmpty()) {
+                        stopWords.add(word);
+                    }
+                }
+            }
+            return stopWords;
+        }
+
+    // Reading the review File to Parse! implementing below helper functions stripPunctuation & isStopWord:
     public static ArrayList<String> parseFile(File textfile) throws IOException {
         ArrayList<String> parsedReview = new ArrayList<>();
         Scanner scanner = new Scanner(textfile);
@@ -40,7 +46,7 @@ public class TextProcessor {
         return parsedReview;
     }
 
-    // stripPunctuatio: remove punctuation from a word (e.g. "great!" -> "great")
+    // stripPunctuation: remove punctuation from a word (e.g. "great!" -> "great")
     public static String stripPunctuation(String word) {
         if (word == null) return null;
         StringBuilder result = new StringBuilder(); //string builder to save stack + string pool space

@@ -1,26 +1,64 @@
+// AnnemarieLewis_hw2
 // SentimentAnalyzer.java
+
+import java.io.*;
 import java.util.*;
 
-public class SentimentAnalyzer {
-    private ArrayList<String> positiveWords;
-    private ArrayList<String> negativeWords;
+    public class SentimentAnalyzer {
+        private ArrayList<String> positiveWords;
+        private ArrayList<String> negativeWords;
 
-    public SentimentAnalyzer(ArrayList<String> pos, ArrayList<String> neg) {
-        this.positiveWords = pos;
-        this.negativeWords = neg;
-    }
+       //constructor of array passed in
+        public SentimentAnalyzer(ArrayList<String> pos, ArrayList<String> neg) {
+            this.positiveWords = pos;
+            this.negativeWords = neg;}
 
-    // TODO: compute score (+1 for positive, -1 for negative)
-    public int computeScore(ArrayList<String> words) {
-        // Your code here
-        return 0;
-    }
+            //constructor of files passed in
+        public SentimentAnalyzer(String posFilePath, String negFilePath) throws IOException {
+            this.positiveWords = loadWordsFromFile(posFilePath);
+            this.negativeWords = loadWordsFromFile(negFilePath);
+        }
 
-    // TODO: classify review
-    public String classifyReview(ArrayList<String> words) {
-        // Your code here
-        return "Neutral";
-    }
+        //helper function for reading the file, ^ for constructor above
+        private ArrayList<String> loadWordsFromFile(String filePath) throws IOException {
+            ArrayList<String> words = new ArrayList<>();
+            File file = new File(filePath);
+            try (Scanner scanner = new Scanner(file)) {
+                while (scanner.hasNextLine()) {
+                    String word = scanner.nextLine().trim().toLowerCase();
+                    if (!word.isEmpty()) {
+                        words.add(word);
+                    }
+                }
+            }
+            return words;
+        }
+
+//method for score
+        public int computeScore(ArrayList<String> words) {
+            int score = 0;
+            for (String word : words) {
+                if (positiveWords.contains(word)) {
+                    score++;
+                } else if (negativeWords.contains(word)) {
+                    score--;
+                }
+            }
+            return score;
+        }
+
+//method for review type
+        // classify review
+        public String classifyReview(ArrayList<String> words) {
+            int score = computeScore(words);
+            if (score > 0) {
+                return "Positive";
+            } else if (score < 0) {
+                return "Negative";
+            } else {
+                return "Neutral";
+            }
+        }
 
     //Updated: This is the missing Link!
     // NOte to CS514: please see the inclusion of the "analyze" method
