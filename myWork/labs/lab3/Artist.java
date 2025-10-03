@@ -16,4 +16,9 @@ public class Artist extends Entity{
         this.artistsSongs = songs;
         this.artistAlbums = albums;
     }
+//for printing object as string in Music Manager (printed wonky object # without)
+    @Override
+    public String toString() {
+        return name; // or return "Artist: " + name;
+    }
 }

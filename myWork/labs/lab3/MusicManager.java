@@ -1,40 +1,54 @@
 public class MusicManager {
     public static void main(String[] args) {
-        // Create an artist
-        Artist artist = new Artist("The Beatles");
 
-        // Create some Songs
-        Song song1 = new Song("Help");
-        Song song2 = new Song("Ticket to Ride");
+        // Created an artist
+        Artist beatles = new Artist("The Beatles");
+        System.out.println("artist : " + beatles.name);
+
+        // Created some Songs
+        Song abbey = new Song("Abbey Road");
+        Song lucy = new Song("Lucy in the Sky");
+        System.out.println("songs created: " + abbey.name + " + " + lucy.name);
+
+        // Created an Album
+        Album abbeyR = new Album("Abbey Road Album");
+        Album misc = new Album("MISC");
+        System.out.println("albums created: " + abbeyR.name + " + " + misc.name);
 
         // Link songs to the artist-->
-        // song1.artist refers to instance variable artist within the Song class
-        song1.artist = artist; //artist referst to the artist object created above in this main method
-        song2.artist = artist;
+        // help.artist refers to instance variable artist within the Song class + help object
+        abbey.artist = beatles; //beatles refers to the beatles object created above in this main method (^artist refers to instance variable artist in help object)
+        lucy.artist = beatles;
+        System.out.println("artists of these songs : " + abbey.artist + " + " + lucy.artist);
+        //added override to make this work in Artist class! :)
 
-        // We also apply songs to the artist class
+        // Link artist to songs-->
         //setting instance variable of an array "artistSongs" in artist class to add song1 (object created above) to the artist created above ("the beatles")
-        artist.artistsSongs.add(song1);
-        artist.artistsSongs.add(song2);
-
-        // Create an Album
-        Album album = new Album("Help");
-        album.performer = artist;
-
-        // We also apply the songs to the albums
-        album.songs.add(song1);
-        album.songs.add(song2);
-
-        // Link album to artist
-        artist.artistAlbums.add(album);
-
-        // Print some details
-        System.out.println("Artist: " + artist.name);
-        System.out.println("Album: " + album.name);
-        System.out.println("Songs in the album:");
-
-        for (Song s : album.songs) {
+        beatles.artistsSongs.add(abbey);
+        beatles.artistsSongs.add(lucy);
+        System.out.println("beatles songs : ");
+        for (Song s : beatles.artistsSongs) {
             System.out.println(" - " + s.name);
+        }
+
+        // linked album to performer
+        abbeyR.performer = beatles;
+        System.out.println("performer of " + abbey.name + " " + abbeyR.performer);
+
+        // linked songs to the albums
+        abbeyR.songs.add(abbey);
+        abbeyR.songs.add(lucy);
+        System.out.println("Songs in " + abbeyR.name + " :");
+        for (Song s : abbeyR.songs) {
+            System.out.println(" - " + s.name);
+        }
+
+        // Linked artist to their albums
+        beatles.artistAlbums.add(abbeyR);
+        beatles.artistAlbums.add(misc);
+        System.out.println("albumns under beatles: ");
+        for (Album a : beatles.artistAlbums) {
+            System.out.println("- " + a.name);
         }
     }
 }

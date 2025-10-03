@@ -4,12 +4,29 @@ import java.util.ArrayList;
 // Ans: contains an ArrayList of songs
 // Required Methods: add or delete songs (obj type: Song)
 
-public class Playlist {
-    //instance variable songlist for array of the songs
+public class Playlist extends Entity {
+    //instance variable saving space
     private ArrayList<Song> songlist;
 
     //constructor
     public Playlist() {
+
         songlist = new ArrayList<Song>();
     }
+
+    //add song method
+    public void addSong(Song s) {
+
+        songlist.add(s);
+    }
+
+    //delete song method
+    public void deleteSong(Song s) {
+        if (songlist.contains(s)) {
+            songlist.remove(s);
+        } else {
+            System.out.printf("%s is not in the playlist\n", s.toString());
+        }
+    }
 }
+
