@@ -7,7 +7,7 @@ Family,Linda Miller,3334445555,AppleCash
 Friend,David Davis,7778889996,Venmo
 Family,Barbara Garcia,8889990007,PayPal
 Friend,James Martinez,9990001118,AppleCash
-Family,Elizabeth Rodriguez,1112223339,Venmo
+Family,Elizabeth Rodriguez,1112223339,venmo
 Friend,William Martins,2223334440,paypal
 Family,Susan Hernandez,3334445551,AppleCash
 Friend,Joseph Lopez,4445556662,Venmo
@@ -37,7 +37,7 @@ Family,Kimberly Wright,9990001115,AppleCash
 Friend,Kevin Scott,1112223336,Venmo
 Family,Deborah Torres,2223334447,PayPal
 Friend,Brian Nelson,3334445558,AppleCash
-Family,Jessica Hill,4445556669,Venmo
+Family,Jessica Hill,4445556669,paypal
 Friend,George Flores,5556667770,PayPal
 Family,Ashley Green,6667778881,AppleCash
 Friend,Edward Adams,7778889992,Venmo

@@ -23,20 +23,26 @@ public class MyPaymentSystem {
         // let's assign the choice to some invalid default
         int choice = -1;
 
-        while (choice != 0) {
-            // this prints out the required menu
-            printMenu();
 
+        while (choice != 0) {
+            printMenu();
             System.out.print("Enter your choice: ");
+
             if (scanner.hasNextInt()) {
                 choice = scanner.nextInt();
-                scanner.nextLine(); // get the next input (newline)
+                scanner.nextLine(); // consume newline
 
-                processChoice(choice, scanner);
+                try {
+                    processChoice(choice, scanner);
+                } catch (PaymentFailedException e) {
+                    System.out.println("Operation failed: " + e.getMessage());
+                }
+
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // get the next (invalid)  input
+                scanner.nextLine(); // consume invalid input
             }
+
             System.out.println();
         }
 
@@ -53,7 +59,7 @@ public class MyPaymentSystem {
         System.out.println("0. Exit");
     }
 
-    private static void processChoice(int choice, Scanner scanner) {
+    private static void processChoice(int choice, Scanner scanner) throws PaymentFailedException {
         //search for person who has that number using method in ContactManager
         //what does contracts parameter represent here: empty value as of right now??????
         ArrayList<Person> contacts = new ArrayList<>();
@@ -62,8 +68,7 @@ public class MyPaymentSystem {
         try {
             contacts = ContactManager.loadContacts("contacts.txt");
         } catch (IOException e) {
-            System.err.println("Error loading contacts: " + e.getMessage());
-            return;
+            throw new PaymentFailedException("Failed to load contacts: " + e.getMessage());
         }
 
         switch (choice) {
@@ -76,8 +81,8 @@ public class MyPaymentSystem {
                 Person contact = ContactManager.searchByPhoneNumber(contacts, phoneNumber);
 
                 if (contact == null) {
-                    System.out.println("No contact found with that number. Select option 5 in prior step for info on who is in your contact list and their numbers! :)");
-                    break; // Go back to main menu
+                    System.out.println("No contact found with that number. Select option 5 to see all contacts.");
+                    break;
                 }
 
                 System.out.println("Contact found:");
@@ -86,18 +91,53 @@ public class MyPaymentSystem {
                 System.out.println("Preferred Payment: " + contact.getPreferredPaymentSystem());
 
                 System.out.print("Enter payment amount: ");
-                double amount = 0;
+                double amount;
                 if (scanner.hasNextDouble()) {
                     amount = scanner.nextDouble();
                     scanner.nextLine(); // consume newline
+                    if (amount <= 0) {
+                        System.out.println("Payment must be a positive amount. Returning to menu.");
+                        break;
+                    }
                 } else {
+                    //?
                     System.out.println("Invalid amount. Returning to menu.");
-                    scanner.nextLine(); // consume invalid input
+                    scanner.nextLine();
                     break;
                 }
 
-                System.out.println("You are about to pay $" + amount + " to " + contact.getFullName() +
-                        " via " + contact.getPreferredPaymentSystem() + ".");
+                // Create PaymentSystem object based on contact's preferred system
+
+                PaymentSystem paymentSystem;
+                switch (contact.getPreferredPaymentSystem().toLowerCase()) {
+                    case "venmo":
+                        paymentSystem = new VenmoPayment();
+                        break;
+                    case "paypal":
+                        paymentSystem = new PayPalPayment();
+                        break;
+                    case "applecash":
+                        paymentSystem = new AppleCashPayment();
+                        break;
+                    default:
+                        System.out.println("Unknown payment system. Using default Venmo.");
+                        paymentSystem = new VenmoPayment();
+                }
+
+                double fee = paymentSystem.getTransactionFee(amount);
+                double totalAmount = amount + fee;
+
+                System.out.println("You are about to pay $" + amount +
+                        " to " + contact.getFullName() +
+                        " via " + paymentSystem.getSystemName() +
+                        (fee > 0 ? " (Transaction Fee: $" + fee + ", Total: $" + totalAmount + ")" : "") + ".");
+                // Display deatiled breakdown BEFORE confirmation
+                System.out.println("\n--- Transaction Summary : please double-check details and confirm :)");
+                System.out.printf("Recipient: %s%n", contact.getFullName());
+                System.out.printf("Base Amount: $%.2f%n", amount);
+                System.out.printf("Transaction Fee (%s): $%.2f%n", paymentSystem.getSystemName(), fee);
+                System.out.printf("Total Charged: $%.2f%n", totalAmount);
+                System.out.println("----------------------------");
                 System.out.print("Confirm payment? (yes/no): ");
                 String confirm = scanner.nextLine();
 
@@ -106,29 +146,29 @@ public class MyPaymentSystem {
                     break;
                 }
 
-                System.out.println("Processing payment...");
-                System.out.println("Payment of $" + amount + " to " + contact.getFullName() +
-                        " completed successfully via " + contact.getPreferredPaymentSystem() + "!");
+                try {
+                    paymentSystem.pay(contact, amount); // throwing PaymentFailedException
+                } catch (PaymentFailedException e) {
+                    System.out.println("Payment failed: " + e.getMessage());
+                    break;
+                }
 
-            //add writing payment info to file code here (*used chat-gpt heavily for this step)
-            try (FileWriter writer = new FileWriter("payments.txt", true);
-                 BufferedWriter bw = new BufferedWriter(writer);
-                 PrintWriter out = new PrintWriter(bw)) {
+                // Create Payment object
+                Payment payment = new Payment(contact.getFullName(), amount, paymentSystem.getSystemName(),
+                        java.time.LocalDateTime.now(), fee);
 
-                // Format: PhoneNumber,FullName,Amount,PaymentSystem,DateTime
-                String paymentLine = contact.getPhoneNumber() + "," +
-                        contact.getFullName() + "," +
-                        amount + "," +
-                        contact.getPreferredPaymentSystem() + "," +
-                        java.time.LocalDateTime.now();
+                // Save to payments.txt : note, used chatgpt heavily here
+                try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("payments.txt", true)))) {
+                    // Format: Recipient,Amount,PaymentSystem,Timestamp,Fee
+                    String line = payment.getRecipientName() + "," + payment.getAmount() + "," +
+                            payment.getPaymentSystem() + "," + payment.getTimestamp() + "," +
+                            payment.getTransactionFee();
+                    out.println(line);
+                    System.out.println("Payment saved to payments.txt successfully!");
+                } catch (IOException e) {
+                    throw new PaymentFailedException("Failed to save payment: " + e.getMessage());
+                }
 
-                out.println(paymentLine);
-
-                System.out.println("Payment saved to payments.txt successfully!");
-
-            } catch (IOException e) {
-                System.err.println("Error saving payment: " + e.getMessage());
-            }
                 break;
 
             case 2:
@@ -143,20 +183,21 @@ public class MyPaymentSystem {
                     System.out.println("\n-All Payments-");
                     while (fileScanner.hasNextLine()) {
                         String line = fileScanner.nextLine();
-                        // Each line format: PhoneNumber,FullName,Amount,PaymentSystem,DateTime
+
                         String[] parts = line.split(",");
 
                         if (parts.length >= 5) {
-                            String phone = parts[0];
-                            String name = parts[1];
-                            String payAmount = parts[2];
-                            String system = parts[3];
-                            String timestamp = parts[4];
+                            String phone = parts[0];       // actually stores recipient name
+                            String name = parts[1];        // actually stores amount
+                            String payAmount = parts[2];   // actually stores payment system
+                            String system = parts[3];      // actually stores timestamp
+                            String timestamp = parts[4];   // actually stores fee
 
-                            System.out.println("Recipient: " + name + " 📞 " + phone);
-                            System.out.println("Amount: $" + payAmount);
-                            System.out.println("Payment Method: " + system);
-                            System.out.println("Timestamp: " + timestamp);
+                            System.out.println("Recipient: " + phone);
+                            System.out.println("Amount: $" + name);
+                            System.out.println("Payment Method: " + payAmount);
+                            System.out.println("Timestamp: " + system);
+                            System.out.println("Transaction Fee: $" + timestamp);
                             System.out.println("-----------");
                         } else {
                             System.out.println("Malformed payment entry: " + line);
@@ -166,6 +207,7 @@ public class MyPaymentSystem {
                     System.err.println("Error reading payments file: " + e.getMessage());
                 }
                 break;
+
 
             case 3:
                 System.out.println("Update Preferred Payment System: ");
@@ -219,7 +261,7 @@ public class MyPaymentSystem {
                     break;
                 }
 
-                System.out.println("\n--- Contact Details ---");
+                System.out.println("\n--- Contact Details! ---");
                 System.out.println("Full Name: " + contactToPrint.getFullName());
                 System.out.println("Contact Type: " + contactToPrint.getContactType());
                 System.out.println("Phone Number: " + contactToPrint.getPhoneNumber());
@@ -230,8 +272,7 @@ public class MyPaymentSystem {
                 System.out.println("---------------------------");
                 break;
 
-
-            case 5: //added case 5+functionality for people who want to see who is currently in/not in their contact list
+            case 5: //added case 5, functionality for people who want to see who is currently in/not in their contact list
                 System.out.println("Print all contacts from my contact list:");
 
                 if (contacts.isEmpty()) {

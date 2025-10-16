@@ -39,6 +39,7 @@ public class ContactManager {
                 String fullName = parts[1].trim();
                 String phoneNumber = parts[2].trim();
                 String preferredPaymentSystem = parts[3].trim();
+//                String relationship = parts[4].trim();
 
                 // Split the full name into first and last name
                 //Assuming we will always have first name AND last name
@@ -46,12 +47,13 @@ public class ContactManager {
                 String firstName = nameParts[0];
                 String lastName = nameParts[1];
 
+
                 // Create the appropriate type of Person based on contactType
                 Person person;
                 if (contactType.equalsIgnoreCase("Friend")) {
-                    person = new Friend(firstName, lastName, phoneNumber, preferredPaymentSystem);
+                    person = new Friend(firstName, lastName, phoneNumber, preferredPaymentSystem, contactType);
                 } else if (contactType.equalsIgnoreCase("Family")) {
-                    person = new Family(firstName, lastName, phoneNumber, preferredPaymentSystem);
+                    person = new Family(firstName, lastName, phoneNumber, preferredPaymentSystem, contactType);
                 } else {
                     System.err.println("Unknown contact type: " + contactType);
                     continue;
@@ -91,6 +93,16 @@ public class ContactManager {
      * Sample main that tests the loading of the contacts and search
      * by number through the ArrayList of Person/Contacts
      */
+
+    public static Person searchByFullName(ArrayList<Person> contacts, String fullName) {
+        for (Person person : contacts) {
+            if (person.getFullName().equalsIgnoreCase(fullName.trim())) {
+                return person;
+            }
+        }
+        return null; // not found
+    }
+
     public static void main(String[] args) {
         try {
             // Load contacts from file
