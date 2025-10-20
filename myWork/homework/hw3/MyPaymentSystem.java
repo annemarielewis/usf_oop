@@ -106,7 +106,7 @@ public class MyPaymentSystem {
                     break;
                 }
 
-                // Create PaymentSystem object based on contact's preferred system
+                // Create PaymentSystem object based on contact's preferred system : b/c of interface, we know all methods have getTransactionfee ;0
 
                 PaymentSystem paymentSystem;
                 switch (contact.getPreferredPaymentSystem().toLowerCase()) {
@@ -153,11 +153,11 @@ public class MyPaymentSystem {
                     break;
                 }
 
-                // Create Payment object
+                // Create Payment object to save to file
                 Payment payment = new Payment(contact.getFullName(), amount, paymentSystem.getSystemName(),
                         java.time.LocalDateTime.now(), fee);
 
-                // Save to payments.txt : note, used chatgpt heavily here
+                // Save to payments.txt : note, used chatgpt pretty heavily here!
                 try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("payments.txt", true)))) {
                     // Format: Recipient,Amount,PaymentSystem,Timestamp,Fee
                     String line = payment.getRecipientName() + "," + payment.getAmount() + "," +
@@ -187,11 +187,11 @@ public class MyPaymentSystem {
                         String[] parts = line.split(",");
 
                         if (parts.length >= 5) {
-                            String phone = parts[0];       // actually stores recipient name
-                            String name = parts[1];        // actually stores amount
-                            String payAmount = parts[2];   // actually stores payment system
-                            String system = parts[3];      // actually stores timestamp
-                            String timestamp = parts[4];   // actually stores fee
+                            String phone = parts[0];
+                            String name = parts[1];
+                            String payAmount = parts[2];
+                            String system = parts[3];
+                            String timestamp = parts[4];
 
                             System.out.println("Recipient: " + phone);
                             System.out.println("Amount: $" + name);
@@ -247,7 +247,7 @@ public class MyPaymentSystem {
                 // new current payment system
                 System.out.println("Updated preferred payment system: " + contact.getPreferredPaymentSystem());
 
-                break; // Return to main menu
+                break;
 
             case 4:
                 System.out.println("Print Contact Information selected.");
