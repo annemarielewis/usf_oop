@@ -17,13 +17,17 @@ public class LinkedList {
 
     // Task 1: Constructor
     public LinkedList() {
-        // TODO: Initialize the list
+        this.head=null;
+        this.size=0; //setting size to 0, we know head containes value of 0 for its int
     }
 
     // Task 1: Add element at the front
     public void addInFront(Object data) {
-        // TODO: Create a new node and add it at the front
-    }
+        Node newNode = new Node(data);     // Step 1 example: newNode → [X] → null | head → [A] → [B] → null
+        newNode.next = head;               // Step 2 --  newNode → [X] → [A] → [B] → null | head → [A] → [B] → null | "Hey, new node — link yourself to the current head of the list ... Without this line, when you insert a node at the front, the rest of the list would be lost — disconnected and inaccessible — because you'd overwrite the head before saving what it was pointing to."
+        head = newNode;                    // Step 3 -- Updates the head pointer of the list to point to the new node.
+        size++;                            // Step 4 -- head → [X] → [A] → [B] → null
+         }
 
     // Task 1: Print all elements
     public void print() {
