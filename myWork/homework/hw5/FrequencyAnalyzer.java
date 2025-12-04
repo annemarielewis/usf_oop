@@ -35,9 +35,10 @@ public class FrequencyAnalyzer {
                 freqMap.put(c, 1);
             }
         }
+        System.out.println(freqMap);
         return freqMap; //returns HashMap<Character, Integer>
     }
-}
+
     /**
      * Main method - reads file, counts frequencies, saves to codebook.
      * Usage: java FrequencyAnalyzer input.txt codebook.txt
@@ -45,7 +46,7 @@ public class FrequencyAnalyzer {
      * @param args command line arguments: [input file] [output codebook]
      */
     public static void main(String[] args) {
-        if (args.length != 2) {
+    if (args.length != 2) {
             System.out.println("Usage: java FrequencyAnalyzer <input file> <codebook file>");
             return;
         }
@@ -67,5 +68,7 @@ public class FrequencyAnalyzer {
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
+        //to stay organized in command line prompts:
+        System.out.println("we just got frequency and input it in a frequency file, next step is to make a HuffmanTree!");
     }
 }

@@ -23,6 +23,7 @@ public class HuffmanTree {
         // TODO: Create a PriorityQueue of HuffmanNodes
         //takes huffmannode class/object in from being able to access it from the other file (where its class is defined publically)
         PriorityQueue<HuffmanNode> pq = new PriorityQueue<>();
+
         // TODO: For each character/frequency pair, create a leaf node and add to queue
         for (Map.Entry<Character, Integer> entry : frequencies.entrySet())
         //Map.Entry is a built-in Java type-->Map.Entry<Character, Integer> is the type that the entry variable is: Every variable must have a declared type
@@ -33,6 +34,7 @@ public class HuffmanTree {
             HuffmanNode leaf = new HuffmanNode(c, freq);
             pq.add(leaf); //all letters will be leafs in the tree, by design for it to work! Non-leafs (internal nodes) will be percentage values only of the added up frequencies of their children leafs!
         }
+
         // Edge case: if there are no characters, tree is empty
         if (pq.isEmpty()) {
             root = null;
@@ -48,14 +50,18 @@ public class HuffmanTree {
         while (pq.size() > 1) {
             HuffmanNode left = pq.poll();   // smallest frequency --> “Take the smallest-frequency HuffmanNode out of the priority queue and store it in the variable left.”
             HuffmanNode right = pq.poll();  // next smallest
+
             //       - Create new parent node with combined frequency
             int combinedFreq = left.getFrequency() + right.getFrequency();
             HuffmanNode parent = new HuffmanNode(combinedFreq, left, right); //// <-- RIGHT HERE: left and right nodes are attached as children to a new parent node
+
             //       - Add parent back to queue
             pq.add(parent); //add and offer behave same here, so used add just because!
-            // TODO: The last remaining node is the root
-            root = pq.poll();
         }
+
+        // TODO: The last remaining node is the root
+        root = pq.poll();
+    }
 
     /**
      * Generates Huffman codes for all characters by traversing the tree.
@@ -93,7 +99,7 @@ public class HuffmanTree {
             generateCodesHelper(node.getRight(), codeSoFar + "1");
         
     }
-    
+
     /**
      * Gets the Huffman codes generated for all characters.
      * 
@@ -119,6 +125,8 @@ public class HuffmanTree {
      * @param args command line arguments: [frequency file] [output codes file]
      */
     public static void main(String[] args) {
+        //to stay organized in command line (woot woot!):
+
         if (args.length != 2) {
             System.out.println("Usage: java HuffmanTree <frequency file> <codes file>");
             return;
@@ -127,7 +135,7 @@ public class HuffmanTree {
         try {
             // Read frequencies
             HashMap<Character, Integer> frequencies = FileIOHelper.readFrequencies(args[0]);
-            
+
             // Build tree
             HuffmanTree tree = new HuffmanTree();
             tree.buildTree(frequencies);
@@ -144,5 +152,6 @@ public class HuffmanTree {
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
+        System.out.println("we just got unique letters organized into a tree data structure and wrote into a code file assessing codes for each letter, next step is to use HuffmanEncoder to concactinate all the letter codes into a single 0s and 1s stream!");
     }
 }
