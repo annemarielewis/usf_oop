@@ -5,6 +5,10 @@ import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
 
 
 /*
@@ -78,15 +82,20 @@ public class MyPaymentSystem {
 
         // Create scheduler using current contacts (for recurring payments)
         PaymentScheduler scheduler = new PaymentScheduler(contacts);
+// SHARED VARIABLES (so we don't redeclare them in cases)
+        String phoneNumber;
+        Person contact;
+        double amount;
+        String confirm;
 
         switch (choice) {
 
             case 1:
                 System.out.println("Pay Contact selected.");
                 System.out.print("Enter the 10-digit phone number of the contact: ");
-                String phoneNumber = scanner.nextLine();
+                phoneNumber = scanner.nextLine();
 
-                Person contact = ContactManager.searchByPhoneNumber(contacts, phoneNumber);
+                contact = ContactManager.searchByPhoneNumber(contacts, phoneNumber);
 
                 if (contact == null) {
                     System.out.println("No contact found with that number. Select option 5 to see all contacts.");
@@ -99,7 +108,7 @@ public class MyPaymentSystem {
                 System.out.println("Preferred Payment: " + contact.getPreferredPaymentSystem());
 
                 System.out.print("Enter payment amount: ");
-                double amount;
+                //amount;
                 if (scanner.hasNextDouble()) {
                     amount = scanner.nextDouble();
                     scanner.nextLine(); // consume newline
@@ -147,7 +156,7 @@ public class MyPaymentSystem {
                 System.out.printf("Total Charged: $%.2f%n", totalAmount);
                 System.out.println("----------------------------");
                 System.out.print("Confirm payment? (yes/no): ");
-                String confirm = scanner.nextLine();
+                confirm = scanner.nextLine();
 
                 if (!confirm.equalsIgnoreCase("yes")) {
                     System.out.println("Payment canceled. Returning to main menu.");
@@ -283,193 +292,240 @@ public class MyPaymentSystem {
             //ADD CASES 5-9 HERE
 
 
-            //CASE 5:
+            // CASE 5: Schedule Recurring Payment
+            // CASE 5: Schedule Recurring Payment
             case 5:
-                //Prompt user to search for a contact
-                System.out.print("Search for contact: Enter the 10-digit phone number of the contact: ");
-                phoneNumber = scanner.nextLine();   // <-- no 'String' here; reuse existing variable
+                System.out.println("Schedule Recurring Payment selected.");
 
-                contact = ContactManager.searchByPhoneNumber(contacts, phoneNumber); // <-- reuse
+                // 1. Pick the contact by phone number
+                System.out.print("Enter the 10-digit phone number of the contact: ");
+                phoneNumber = scanner.nextLine().trim();
+
+                contact = ContactManager.searchByPhoneNumber(contacts, phoneNumber);
 
                 if (contact == null) {
-                    System.out.println("No contact found with that number. Select option 5 to see all contacts.");
+                    System.out.println("No contact found with that number. Select option 10 to see all contacts.");
                     break;
                 }
 
                 System.out.println("Contact found:");
-                //Display contact’s information (name and preferred payment system)
                 System.out.println("Name: " + contact.getFullName());
                 System.out.println("Phone: " + contact.getPhoneNumber());
                 System.out.println("Preferred Payment: " + contact.getPreferredPaymentSystem());
 
-                //Prompt for the payment amount
-                System.out.print("Enter payment amount: ");
+                // 2. Prompt for the recurring payment amount
+                System.out.print("Enter recurring payment amount: ");
                 if (scanner.hasNextDouble()) {
-                    amount = scanner.nextDouble();   // <-- reuse 'amount'
+                    amount = scanner.nextDouble();
                     scanner.nextLine(); // consume newline
                     if (amount <= 0) {
                         System.out.println("Payment must be a positive amount. Returning to menu.");
                         break;
                     }
                 } else {
-                    //?
                     System.out.println("Invalid amount. Returning to menu.");
+                    scanner.nextLine(); // clear invalid
+                    break;
+                }
+
+                // 3. Recurrence menu
+                System.out.println("\nSelect recurrence frequency:");
+                System.out.println("1. Weekly");
+                System.out.println("2. Biweekly");
+                System.out.println("3. Monthly");
+                System.out.println("4. Yearly");
+                System.out.print("Enter your choice: ");
+
+                RecurrenceType recurrenceType;
+                int freqChoice;
+
+                if (scanner.hasNextInt()) {
+                    freqChoice = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+                } else {
+                    System.out.println("Invalid input. Returning to menu.");
                     scanner.nextLine();
                     break;
                 }
 
-                // Create PaymentSystem object based on contact's preferred system : b/c of interface, we know all methods have getTransactionfee ;0
-                switch (contact.getPreferredPaymentSystem().toLowerCase()) {
-                    case "venmo":
-                        paymentSystem = new VenmoPayment();
+                switch (freqChoice) {
+                    case 1:
+                        recurrenceType = RecurrenceType.WEEKLY;
                         break;
-                    case "paypal":
-                        paymentSystem = new PayPalPayment();
+                    case 2:
+                        recurrenceType = RecurrenceType.BIWEEKLY;
                         break;
-                    case "applecash":
-                        paymentSystem = new AppleCashPayment();
+                    case 3:
+                        recurrenceType = RecurrenceType.MONTHLY;
+                        break;
+                    case 4:
+                        recurrenceType = RecurrenceType.YEARLY;
                         break;
                     default:
-                        System.out.println("Unknown payment system. Using default Venmo.");
-                        paymentSystem = new VenmoPayment();
+                        System.out.println("Invalid recurrence selection. Defaulting to MONTHLY.");
+                        recurrenceType = RecurrenceType.MONTHLY;
+                        break;
                 }
 
-                fee = paymentSystem.getTransactionFee(amount);   // <-- reuse 'fee'
-                totalAmount = amount + fee;                       // <-- reuse 'totalAmount'
-
-                System.out.println("You are about to schedule a recurring payment of $" + amount +
-                        " to " + contact.getFullName() +
-                        " via " + paymentSystem.getSystemName() +
-                        (fee > 0 ? " (Transaction Fee: $" + fee + ", Total Charged Each Time: $" + totalAmount + ")" : "") + ".");
-
-                // Display deatiled breakdown BEFORE confirmation
-                System.out.println("\n--- Transaction Summary : please double-check details and confirm :)");
-                System.out.printf("Recipient: %s%n", contact.getFullName());
-                System.out.printf("Base Amount: $%.2f%n", amount);
-                System.out.printf("Transaction Fee (%s): $%.2f%n", paymentSystem.getSystemName(), fee);
-                System.out.printf("Total Charged Each Time: $%.2f%n", totalAmount);
-                System.out.println("----------------------------");
-
-                // Prompt the user to enter the recurrence frequency (Recurrence payment menu)
-                String recurrence = "";
-                boolean validRecurrence = false;
-
-                while (!validRecurrence) {
-                    System.out.println("\nRecurrence options:");
-                    System.out.println("1. Weekly");
-                    System.out.println("2. Biweekly (every 2 weeks)");
-                    System.out.println("3. Monthly");
-                    System.out.println("4. Yearly");
-                    System.out.print("Choose recurrence: ");
-
-                    String recChoice = scanner.nextLine().trim();
-                    switch (recChoice) {
-                        case "1":
-                            recurrence = "Weekly";
-                            validRecurrence = true;
-                            break;
-                        case "2":
-                            recurrence = "Biweekly";
-                            validRecurrence = true;
-                            break;
-                        case "3":
-                            recurrence = "Monthly";
-                            validRecurrence = true;
-                            break;
-                        case "4":
-                            recurrence = "Yearly";
-                            validRecurrence = true;
-                            break;
-                        default:
-                            System.out.println("Invalid choice. Please enter 1, 2, 3, or 4.");
-                    }
-                }
-
-                // Prompt for the start date (yyyy-mm-dd format)
-                java.time.LocalDate startDate = null;
-                boolean validDate = false;
-                while (!validDate) {
-                    System.out.print("Enter start date (yyyy-mm-dd): ");
+                // 4. Prompt for start date (yyyy-mm-dd)
+                LocalDate startDateOnly = null;
+                while (startDateOnly == null) {
+                    System.out.print("Enter start date for recurring payment (yyyy-mm-dd): ");
                     String dateStr = scanner.nextLine().trim();
                     try {
-                        startDate = java.time.LocalDate.parse(dateStr);
-                        validDate = true;
-                    } catch (java.time.format.DateTimeParseException e) {
+                        startDateOnly = LocalDate.parse(dateStr);
+                    } catch (DateTimeParseException e) {
                         System.out.println("Invalid date format. Please try again.");
                     }
                 }
 
-                // Confirmation screen (matches spec)
-                System.out.println("\n=== Confirm Scheduled Payment ===");
+                // pick a default time (9:00 AM) so we store a LocalDateTime
+                LocalDateTime startDateTime = startDateOnly.atTime(9, 0);
+
+                // Payment system for scheduling should be the contact's preferred system
+                String systemName = contact.getPreferredPaymentSystem();
+
+                // 5. Confirmation screen
+                System.out.println("\n--- Recurring Payment Summary ---");
                 System.out.println("Recipient: " + contact.getFullName());
                 System.out.printf("Amount: $%.2f%n", amount);
-                System.out.println("Payment System: " + paymentSystem.getSystemName());
-                System.out.println("Recurrence: " + recurrence);
-                System.out.println("First payment: " + startDate);
-                System.out.print("Confirm? (y/n): ");
+                System.out.println("Payment System: " + systemName);
+                System.out.println("Recurrence: " + recurrenceType);
+                System.out.println("Start Date: " + startDateTime.toLocalDate());
+                System.out.println("---------------------------------");
+                System.out.print("Confirm scheduling this recurring payment? (y/yes or no): ");
 
-                String scheduleConfirm = scanner.nextLine().trim().toLowerCase();
+                confirm = scanner.nextLine().trim().toLowerCase();
 
-                if (!scheduleConfirm.equals("y")) {
-                    System.out.println("Recurring payment canceled. Returning to main menu.");
+                // Accept both "y" and "yes"
+                if (!(confirm.equals("y") || confirm.equals("yes"))) {
+                    System.out.println("Recurring payment NOT scheduled. Returning to main menu.");
                     break;
                 }
 
-                // TODO: hook this up to PaymentScheduler / ScheduledPayment to actually store the schedule.
-// Map recurrence String -> RecurrenceType enum
-                RecurrenceType recurrenceType;
-                switch (recurrence) {
-                    case "Weekly":
-                        recurrenceType = RecurrenceType.WEEKLY;
-                        break;
-                    case "Biweekly":
-                        recurrenceType = RecurrenceType.BIWEEKLY;
-                        break;
-                    case "Monthly":
-                        recurrenceType = RecurrenceType.MONTHLY;
-                        break;
-                    case "Yearly":
-                        recurrenceType = RecurrenceType.YEARLY;
-                        break;
-                    default:
-                        recurrenceType = RecurrenceType.MONTHLY; // sensible default
-                }
+                // 6. Actually schedule it (adds to PQ + writes to scheduled_payments.txt)
+                scheduler.schedulePayment(contact, amount, systemName, recurrenceType, startDateTime);
 
-                // Convert LocalDate -> LocalDateTime for scheduler
-                java.time.LocalDateTime firstPaymentDate = startDate.atStartOfDay();
-
-                // actually schedule the payment using PaymentScheduler
-                scheduler.schedulePayment(
-                        contact,
-                        amount,
-                        paymentSystem.getSystemName(),
-                        recurrenceType,
-                        firstPaymentDate
-                );
-
-                System.out.println("Recurring payment scheduled!");
-                //more code here
+                // 7. Return to main menu
                 break;
 
 
             //CASE 6:
-            //CASE 7:
+            case 6:
+                System.out.println("View Scheduled Payments selected.");
 
-//            case 6:
-//                System.out.println("View Scheduled Payments selected.");
-//                scheduler.displaySchedule();
-//                break;
-//
-//            case 7:
-//                System.out.println("Process Due Payments selected.");
-//                ArrayList<ScheduledPayment> due = scheduler.getDuePayments();
-//                // then loop them, call paymentSystem.pay(...),
-//                // then update each SP's nextPaymentDate using calculateNextPaymentDate(...)
-//                // and re-save
-//                break;
+                if (scheduler.isEmpty()) {
+                    System.out.println("No scheduled payments.");
+                } else {
+                    scheduler.displaySchedule();
+                }
+                break;
+
+            //CASE 7:
+            // CASE 7: Process Due Payments
+            case 7:
+                System.out.println("Process Due Payments selected.");
+
+                // 1. Display a list of payments due
+                ArrayList<ScheduledPayment> duePayments = scheduler.getDuePayments();
+
+                if (duePayments.isEmpty()) {
+                    System.out.println("\nNo scheduled payments are due at this time.\n");
+                    break;
+                }
+
+                System.out.println("\n=== Due Scheduled Payments ===\n");
+                int idx = 1;
+                for (ScheduledPayment sp : duePayments) {
+                    System.out.println(idx + ". " + sp.getRecipient().getFullName());
+                    System.out.printf("   Amount: $%.2f%n", sp.getAmount());
+                    System.out.println("   System: " + sp.getPaymentSystem());
+                    System.out.println("   Next payment: " + sp.getNextPaymentDate().toLocalDate());
+                    System.out.println("   Recurrence: " + sp.getRecurrence());
+                    System.out.println();
+                    idx++;
+                }
+
+                // Optional confirmation before processing everything
+                System.out.print("Process all due payments? (y/n): ");
+                String answer = scanner.nextLine().trim();
+                if (!answer.equalsIgnoreCase("y")) {
+                    System.out.println("Canceled processing scheduled payments. Returning to main menu.");
+                    break;
+                }
+
+                // 2 & 3. Process all due payments + confirm/write to payments.txt
+                try {
+                    scheduler.processDuePayments();
+                } catch (PaymentFailedException e) {
+                    System.out.println("Error while processing scheduled payments: " + e.getMessage());
+                }
+
+                // 4. Return to main menu (break)
+                break;
 
             //CASE 8:
+            case 8:
+                boolean back = false;
+
+                while (!back) {
+                    System.out.println("=== Transaction Analysis ===");
+                    System.out.println("1. View Top Receivers");
+                    System.out.println("2. View Payment System Statistics");
+                    System.out.println("0. Back to Main Menu");
+                    System.out.print("Choose an option: ");
+
+                    int analysisChoice;
+                    if (scanner.hasNextInt()) {
+                        analysisChoice = scanner.nextInt();
+                        scanner.nextLine(); // consume newline
+                    } else {
+                        System.out.println("Invalid input. Please enter a number.");
+                        scanner.nextLine();
+                        continue;
+                    }
+
+                    try {
+                        TransactionAnalyzer analyzer = new TransactionAnalyzer();
+
+                        switch (analysisChoice) {
+                            case 1:
+                                System.out.println("=== Top Receivers ===");
+                                analyzer.printTopReceivers(3);
+                                break;
+
+                            case 2:
+                                analyzer.printPaymentSystemStatisticsScreen();
+                                break;
+
+                            case 0:
+                                back = true;
+                                break;
+
+                            default:
+                                System.out.println("Invalid option. Try again.");
+                        }
+                    } catch (IOException e) {
+                        System.out.println("Error loading transaction data: " + e.getMessage());
+                    }
+
+                    System.out.println();
+                }
+                break;
+
             //CASE 9:
+
+            case 9:
+                try {
+                    TransactionAnalyzer analyzer = new TransactionAnalyzer();
+                    ReportGenerator report =
+                            new ReportGenerator(analyzer, contacts);
+                    report.generateSummaryReport();
+                } catch (IOException e) {
+                    System.out.println("Error generating summary report.");
+                }
+                break;
+
 
             case 10: //added case 5, functionality for people who want to see who is currently in/not in their contact list
                 System.out.println("Print all contacts from my contact list:");

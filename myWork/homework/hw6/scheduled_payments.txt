@@ -1,0 +1,8 @@
+Brenda Mitchell,78.0,AppleCash,2025-04-27T00:00:00,WEEKLY
+Brenda Mitchell,56.0,AppleCash,2026-02-02T00:00:00,WEEKLY
+Timothy Carter,86.0,PayPal,2026-01-01T09:00:00,WEEKLY
+Brenda Mitchell,45.0,AppleCash,2026-02-03T00:00:00,WEEKLY
+Brenda Mitchell,87.0,AppleCash,2030-01-05T00:00:00,MONTHLY
+David Davis,89.0,Venmo,2026-08-08T09:00:00,YEARLY
+Brenda Mitchell,67.0,AppleCash,2026-01-02T00:00:00,MONTHLY
+James Martinez,84.2,AppleCash,2026-04-07T09:00:00,WEEKLY
